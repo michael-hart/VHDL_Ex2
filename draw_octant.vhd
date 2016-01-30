@@ -5,27 +5,28 @@ USE IEEE.std_logic_1164.ALL;
 USE IEEE.numeric_std.ALL;
 
 ENTITY draw_octant IS
+	GENERIC (vsize : integer := 16);
   PORT(
     clk, init, draw, xbias, disable		: IN  std_logic;
-    xin, yin									: IN  std_logic_vector(11 DOWNTO 0);
+    xin, yin									: IN  std_logic_vector(vsize-1 DOWNTO 0);
     done											: OUT std_logic;
-    x, y											: OUT std_logic_vector(11 DOWNTO 0)
+    x, y											: OUT std_logic_vector(vsize-1 DOWNTO 0)
     );
 END ENTITY draw_octant;
 
 ARCHITECTURE behav OF draw_octant IS
 
   SIGNAL done1								: std_logic;
-  SIGNAL x1, y1							: std_logic_vector(11 DOWNTO 0);
-  SIGNAL xincr, yincr, xnew, ynew	: std_logic_vector(11 DOWNTO 0);
-  SIGNAL error, err1, err2				: std_logic_vector(12 DOWNTO 0);
+  SIGNAL x1, y1							: std_logic_vector(vsize-1 DOWNTO 0);
+  SIGNAL xincr, yincr, xnew, ynew	: std_logic_vector(vsize-1 DOWNTO 0);
+  SIGNAL error, err1, err2				: std_logic_vector(vsize DOWNTO 0);
 
   ALIAS slv IS std_logic_vector;
 
 BEGIN
 
 	C1 : PROCESS(error, xincr, yincr, x1, y1, xnew, ynew, init, draw)
-		VARIABLE err1_v, err2_v : std_logic_vector(12 DOWNTO 0);
+		VARIABLE err1_v, err2_v : std_logic_vector(vsize DOWNTO 0);
  
 		BEGIN
 		
@@ -70,10 +71,10 @@ BEGIN
 					xnew <= xin;
 					ynew <= yin;
 					-- Assign increment values
-					xincr <= "000000000000";
-					yincr <= "000000000000";
+					xincr <= (others => '0');
+					yincr <= (others => '0');
 					-- Assign error to 0
-					error <= "0000000000000";
+					error <= (others => '0');
 					
 				-- else check other parameters
 				ELSE
@@ -83,7 +84,7 @@ BEGIN
 						xnew <= xin;
 						ynew <= yin;
 						-- Assign error to 0
-						error <= "0000000000000";
+						error <= (others => '0');
 					ELSE
 						-- Check to see if done
 						IF done1 = '0' THEN
