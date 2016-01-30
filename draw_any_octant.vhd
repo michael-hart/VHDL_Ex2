@@ -181,7 +181,7 @@ ARCHITECTURE comb OF draw_any_octant IS
 BEGIN
 
 	-- Apply inputs to RD
-	RD1 : entity WORK.rd PORT MAP (
+	RD1 : ENTITY rd PORT MAP (
 		clk => clk, 
 		negx_in => negx, 
 		negy_in => negy, 
@@ -192,7 +192,7 @@ BEGIN
 		swapxy_out => swapxy_delayed
 		);
 	-- Map inputs through swap module to _s1 signals
-	SWAP1 : entity WORK.swap GENERIC MAP(N => vsize) PORT MAP (
+	SWAP1 : ENTITY swap GENERIC MAP(N => vsize) PORT MAP (
 		c => swapxy,
 		xin => xin,
 		yin => yin,
@@ -200,12 +200,12 @@ BEGIN
 		yout => yin_s1
 	);
 	-- Map stage 1 outputs through inverters
-	INV1 : entity WORK.inv GENERIC MAP(N => vsize) PORT MAP (
+	INV1 : ENTITY inv GENERIC MAP(N => vsize) PORT MAP (
 		c => negx,
 		a => xin_s1,
 		b => xin_s2
 	);
-	INV2 : entity WORK.inv GENERIC MAP(N => vsize) PORT MAP (
+	INV2 : ENTITY inv GENERIC MAP(N => vsize) PORT MAP (
 		c => negy,
 		a => yin_s1,
 		b => yin_s2
@@ -213,11 +213,11 @@ BEGIN
 	
 	XOR1: PROCESS(swapxy, xbias)
 	BEGIN
-	  xbias_i <= swapxy XOR xbias;
+		xbias_i <= swapxy XOR xbias;
 	END PROCESS XOR1;
 	
 	-- Map all inputs to draw_octant
-	DRAW1 : entity WORK.draw_octant GENERIC MAP(vsize => vsize) PORT MAP (
+	DRAW1 : ENTITY draw_octant GENERIC MAP(vsize => vsize) PORT MAP (
 		clk => clk,
 		init => init,
 		draw => draw,
@@ -231,19 +231,19 @@ BEGIN
 	);
 	
 	-- Map stage 1 outputs through second stage inverters
-	INV3 : entity WORK.inv GENERIC MAP(N => vsize) PORT MAP (
+	INV3 : ENTITY inv GENERIC MAP(N => vsize) PORT MAP (
 		c => negx_delayed,
 		a => xout_s1,
 		b => xout_s2
 	);
-	INV4 : entity WORK.inv GENERIC MAP(N => vsize) PORT MAP (
+	INV4 : ENTITY inv GENERIC MAP(N => vsize) PORT MAP (
 		c => negy_delayed,
 		a => yout_s1,
 		b => yout_s2
 	);
 	
 	-- Map stage 2 outputs through swap module to final outputs
-	SWAP2 : entity WORK.swap GENERIC MAP(N => vsize) PORT MAP (
+	SWAP2 : ENTITY swap GENERIC MAP(N => vsize) PORT MAP (
 		c => swapxy_delayed,
 		xin => xout_s2,
 		yin => yout_s2,
