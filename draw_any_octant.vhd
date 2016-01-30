@@ -175,10 +175,13 @@ ARCHITECTURE comb OF draw_any_octant IS
 	SIGNAL xout_s1, yout_s1 : std_logic_vector(vsize-1 DOWNTO 0);
 	-- Outputs of second stage inverters, _s2 suffix
 	SIGNAL xout_s2, yout_s2 : std_logic_vector(vsize-1 DOWNTO 0);
-
+	
+	SIGNAL xbias_i : std_logic;
+	
 BEGIN
+
 	-- Apply inputs to RD
-	RD1 : rd PORT MAP (
+	RD1 : entity WORK.rd PORT MAP (
 		clk => clk, 
 		negx_in => negx, 
 		negy_in => negy, 
@@ -189,7 +192,7 @@ BEGIN
 		swapxy_out => swapxy_delayed
 		);
 	-- Map inputs through swap module to _s1 signals
-	SWAP1 : swap GENERIC MAP(N => vsize) PORT MAP (
+	SWAP1 : entity WORK.swap GENERIC MAP(N => vsize) PORT MAP (
 		c => swapxy,
 		xin => xin,
 		yin => yin,
@@ -197,23 +200,28 @@ BEGIN
 		yout => yin_s1
 	);
 	-- Map stage 1 outputs through inverters
-	INV1 : inv GENERIC MAP(N => vsize) PORT MAP (
+	INV1 : entity WORK.inv GENERIC MAP(N => vsize) PORT MAP (
 		c => negx,
 		a => xin_s1,
 		b => xin_s2
 	);
-	INV2 : inv GENERIC MAP(N => vsize) PORT MAP (
+	INV2 : entity WORK.inv GENERIC MAP(N => vsize) PORT MAP (
 		c => negy,
 		a => yin_s1,
 		b => yin_s2
 	);
 	
+	XOR1: PROCESS(swapxy, xbias)
+	BEGIN
+	  xbias_i <= swapxy XOR xbias;
+	END PROCESS XOR1;
+	
 	-- Map all inputs to draw_octant
-	DRAW1 : draw_octant PORT MAP (
+	DRAW1 : entity WORK.draw_octant GENERIC MAP(vsize => vsize) PORT MAP (
 		clk => clk,
 		init => init,
 		draw => draw,
-		xbias => swapxy XOR xbias,
+		xbias => xbias_i,
 		disable => disable,
 		xin => xin_s2,
 		yin => yin_s2,
@@ -223,19 +231,19 @@ BEGIN
 	);
 	
 	-- Map stage 1 outputs through second stage inverters
-	INV3 : inv GENERIC MAP(N => vsize) PORT MAP (
+	INV3 : entity WORK.inv GENERIC MAP(N => vsize) PORT MAP (
 		c => negx_delayed,
 		a => xout_s1,
 		b => xout_s2
 	);
-	INV4 : inv GENERIC MAP(N => vsize) PORT MAP (
+	INV4 : entity WORK.inv GENERIC MAP(N => vsize) PORT MAP (
 		c => negy_delayed,
 		a => yout_s1,
 		b => yout_s2
 	);
 	
 	-- Map stage 2 outputs through swap module to final outputs
-	SWAP2 : swap GENERIC MAP(N => vsize) PORT MAP (
+	SWAP2 : entity WORK.swap GENERIC MAP(N => vsize) PORT MAP (
 		c => swapxy_delayed,
 		xin => xout_s2,
 		yin => yout_s2,
