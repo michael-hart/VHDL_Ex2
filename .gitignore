@@ -1,0 +1,7 @@
+# Remove database entries from git repo
+db/*
+
+# Remove build files from git
+incremental_db/*
+output_files/*
+simulation/*
